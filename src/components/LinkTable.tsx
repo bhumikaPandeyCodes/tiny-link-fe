@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Copy, Trash2, ExternalLink, BarChart2, Check } from 'lucide-react';
+import { Copy, Trash2, ExternalLink, BarChart2, Check, Search, Link2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { api } from '../lib/api';
 
-// 1. Define the shape of the data coming from your DB
 export interface LinkData {
     id: number;
     short_code: string;
@@ -14,7 +13,6 @@ export interface LinkData {
     created_at: string;
 }
 
-// 2. Define the props expected by this component
 interface LinkListProps {
     links: LinkData[];
     fetchLinks: () => void;
@@ -24,7 +22,6 @@ const LinkList = ({ links, fetchLinks }: LinkListProps) => {
     const [search, setSearch] = useState<string>('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
-    // Filter logic
     const filteredLinks = links.filter(link =>
         link.short_code.toLowerCase().includes(search.toLowerCase()) ||
         link.original_url.toLowerCase().includes(search.toLowerCase())
@@ -43,16 +40,9 @@ const LinkList = ({ links, fetchLinks }: LinkListProps) => {
     const handleCopy = (code: string) => {
         let fullUrl = '';
 
-        // Check karein ki hum Localhost par hain ya Production par
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            // CASE 1: LOCALHOST
-            // Hum seedha Backend ka port (3000) use karenge
-            // Kyunki locally 'vercel.json' kaam nahi karta
             fullUrl = `http://localhost:3000/${code}`;
         } else {
-            // CASE 2: PRODUCTION (Vercel)
-            // Hum frontend ka hi URL use karenge
-            // Kyunki wahan 'vercel.json' redirect handle kar lega
             fullUrl = `${window.location.origin}/${code}`;
         }
 
@@ -61,82 +51,105 @@ const LinkList = ({ links, fetchLinks }: LinkListProps) => {
         setTimeout(() => setCopiedId(null), 2000);
     };
 
-
-
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <h2 className="font-semibold text-gray-700">All Links ({links.length})</h2>
-                <input
-                    type="text"
-                    placeholder="Search by code or URL..."
-                    className="px-3 py-1.5 border border-gray-300 rounded text-sm w-full sm:w-64 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
+            <div className="p-6 border-b border-gray-200/50 bg-gradient-to-r from-gray-50 to-gray-100/50">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 className="font-bold text-xl text-gray-800">Your Links</h2>
+                        <p className="text-sm text-gray-500 mt-0.5">{links.length} total links</p>
+                    </div>
+                    <div className="relative w-full sm:w-72">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search links..."
+                            className="pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white shadow-sm"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+                </div>
             </div>
 
             <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                    <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+                <table className="w-full text-sm">
+                    <thead className="text-xs font-semibold text-gray-600 uppercase bg-gray-50/50 border-b border-gray-200">
                         <tr>
-                            <th className="px-6 py-3">Short Code</th>
-                            <th className="px-6 py-3">Original URL</th>
-                            <th className="px-6 py-3 text-center">Clicks</th>
-                            <th className="px-6 py-3">Last Clicked</th>
-                            <th className="px-6 py-3 text-right">Actions</th>
+                            <th className="px-6 py-4 text-left">Short Code</th>
+                            <th className="px-6 py-4 text-left">Original URL</th>
+                            <th className="px-6 py-4 text-center">Clicks</th>
+                            <th className="px-6 py-4 text-left">Last Clicked</th>
+                            <th className="px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-gray-100">
                         {filteredLinks.length === 0 ? (
                             <tr>
-                                {/* Fix: colSpan expects a number, not a string */}
-                                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                                    No links found. Create one above!
+                                <td colSpan={5} className="px-6 py-16 text-center">
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="p-4 bg-gray-100 rounded-full">
+                                            <Link2 className="h-8 w-8 text-gray-400" />
+                                        </div>
+                                        <p className="text-gray-500 font-medium">No links found</p>
+                                        <p className="text-sm text-gray-400">Create your first shortened link above!</p>
+                                    </div>
                                 </td>
                             </tr>
                         ) : (
                             filteredLinks.map((link) => (
-                                <tr key={link.id} className="bg-white border-b hover:bg-gray-50">
-                                    <td className="px-6 py-4 font-medium text-indigo-600">
-                                        <Link to={`/code/${link.short_code}`} className="hover:underline flex items-center gap-1">
-                                            {link.short_code}
-                                            <ExternalLink className="h-3 w-3" />
-                                        </Link>
-                                    </td>
-                                    <td className="px-6 py-4 max-w-xs truncate text-gray-600" title={link.original_url}>
-                                        {link.original_url}
-                                    </td>
-                                    <td className="px-6 py-4 text-center font-semibold">
-                                        {link.click_count}
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-500">
-                                        {link.last_clicked_at
-                                            ? formatDistanceToNow(new Date(link.last_clicked_at), { addSuffix: true })
-                                            : '-'}
-                                    </td>
-                                    <td className="px-6 py-4 text-right flex justify-end gap-2">
-                                        <button
-                                            onClick={() => handleCopy(link.short_code)}
-                                            className="p-1.5 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded transition"
-                                            title="Copy Short Link"
-                                        >
-                                            {copiedId === link.short_code ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                                        </button>
+                                <tr key={link.id} className="hover:bg-gray-50/50 transition-colors">
+                                    <td className="px-6 py-4">
                                         <Link
                                             to={`/code/${link.short_code}`}
-                                            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition"
-                                            title="View Stats"
+                                            className="inline-flex items-center gap-1.5 font-semibold text-indigo-600 hover:text-indigo-700 group"
                                         >
-                                            <BarChart2 className="h-4 w-4" />
+                                            <span className="font-mono">{link.short_code}</span>
+                                            <ExternalLink className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </Link>
-                                        <button
-                                            onClick={() => handleDelete(link.short_code)}
-                                            className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition"
-                                            title="Delete"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
+                                    </td>
+                                    <td className="px-6 py-4 max-w-sm">
+                                        <div className="truncate text-gray-600 hover:text-gray-900" title={link.original_url}>
+                                            {link.original_url}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
+                                            {link.click_count}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-500 text-sm">
+                                        {link.last_clicked_at
+                                            ? formatDistanceToNow(new Date(link.last_clicked_at), { addSuffix: true })
+                                            : <span className="text-gray-400">Never</span>}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex justify-end gap-1">
+                                            <button
+                                                onClick={() => handleCopy(link.short_code)}
+                                                className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
+                                                title="Copy Short Link"
+                                            >
+                                                {copiedId === link.short_code ?
+                                                    <Check className="h-4 w-4 text-green-600" /> :
+                                                    <Copy className="h-4 w-4" />
+                                                }
+                                            </button>
+                                            <Link
+                                                to={`/code/${link.short_code}`}
+                                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                                                title="View Stats"
+                                            >
+                                                <BarChart2 className="h-4 w-4" />
+                                            </Link>
+                                            <button
+                                                onClick={() => handleDelete(link.short_code)}
+                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                                                title="Delete"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))

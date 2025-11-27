@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import type { FormEvent } from 'react'
-import { api } from '../lib/api'; // Ya '../lib/api' check kar lena path
+import { api } from '../lib/api';
 import { Plus, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
-import axios from 'axios'; // Import Axios types
+import axios from 'axios';
 
 interface CreateLinkFormProps {
     onSuccess: () => void;
@@ -45,7 +45,6 @@ const CreateLinkForm: React.FC<CreateLinkFormProps> = ({ onSuccess }) => {
             setShortCode('');
             onSuccess();
         } catch (err) {
-            // FIX: Check if error is from Axios
             if (axios.isAxiosError(err) && err.response?.status === 409) {
                 setStatus({ type: 'error', msg: 'That short code is already taken. Please try another.' });
             } else {

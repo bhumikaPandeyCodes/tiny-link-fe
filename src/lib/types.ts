@@ -1,5 +1,3 @@
-// src/types.ts
-
 export interface LinkData {
     id: number;
     short_code: string;
