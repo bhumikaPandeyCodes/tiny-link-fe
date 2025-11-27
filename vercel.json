@@ -2,11 +2,11 @@
     "rewrites": [
         {
             "source": "/:code",
-            "destination": "http://localhost:3000/:code"
+            "destination": "https://tiny-link-be.vercel.app/:code"
         },
         {
             "source": "/api/:match*",
-            "destination": "http://localhost:3000/api/:match*"
+            "destination": "https://tiny-link-be.vercel.app/api/:match*"
         }
     ]
 }
