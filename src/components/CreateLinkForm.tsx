@@ -1,9 +1,8 @@
-// src/components/CreateLinkForm.tsx
 import React, { useState } from 'react';
 import type { FormEvent } from 'react'
-import { api } from '../lib/api';
+import { api } from '../lib/api'; // Ya '../lib/api' check kar lena path
 import { Plus, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
-import axios from 'axios';
+import axios from 'axios'; // Import Axios types
 
 interface CreateLinkFormProps {
     onSuccess: () => void;
@@ -22,7 +21,6 @@ const CreateLinkForm: React.FC<CreateLinkFormProps> = ({ onSuccess }) => {
         } catch (_) {
             return 'Please enter a valid URL (e.g., https://example.com).';
         }
-        // PDF Rule: [A-Za-z0-9]{6,8}
         if (shortCode && !/^[A-Za-z0-9]{6,8}$/.test(shortCode)) {
             return 'Custom code must be 6-8 alphanumeric characters.';
         }
@@ -47,6 +45,7 @@ const CreateLinkForm: React.FC<CreateLinkFormProps> = ({ onSuccess }) => {
             setShortCode('');
             onSuccess();
         } catch (err) {
+            // FIX: Check if error is from Axios
             if (axios.isAxiosError(err) && err.response?.status === 409) {
                 setStatus({ type: 'error', msg: 'That short code is already taken. Please try another.' });
             } else {
@@ -93,7 +92,6 @@ const CreateLinkForm: React.FC<CreateLinkFormProps> = ({ onSuccess }) => {
                 </button>
             </form>
 
-            {/* Feedback Messages */}
             {status.msg && (
                 <div className={`mt-4 p-3 rounded-md flex items-center gap-2 text-sm ${status.type === 'error' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
                     }`}>
